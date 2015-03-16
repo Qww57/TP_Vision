@@ -8,6 +8,10 @@
 
 #include <iostream>
 #include "ArUco-OpenGL.h"
+#include "ObjLoader.h"
+
+extern Model_OBJ objet;
+extern Model_OBJ objet2;
 
 // Constructor
 ArUco::ArUco(string intrinFileName, float markerSize) {
@@ -36,14 +40,14 @@ void ArUco::drawAxis(float axisSize) {
    glVertex3f(0.0f, 0.0f, 0.0f); // origin of the line
    glVertex3f(axisSize,0.0f, 0.0f); // ending point of the line
    glEnd( );
-   
+
    // Y
    glColor3f (0,1,0);
    glBegin(GL_LINES);
    glVertex3f(0.0f, 0.0f, 0.0f); // origin of the line
    glVertex3f(0.0f, axisSize, 0.0f); // ending point of the line
    glEnd( );
-   
+
    // Z
    glColor3f (0,0,1);
    glBegin(GL_LINES);
@@ -59,7 +63,7 @@ void ArUco::drawScene() {
    // If we do not have an image we don't do anyhting
    if (m_ResizedImage.rows==0)
       return;
-   
+
    // Setting up  OpenGL matrices
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -69,16 +73,16 @@ void ArUco::drawScene() {
    glViewport(0, 0, m_GlWindowSize.width , m_GlWindowSize.height);
    glDisable(GL_TEXTURE_2D);
    glPixelZoom( 1, -1);
-   
+
    //////glRasterPos3f( 0, m_GlWindowSize.height  - 0.5f, -1.0f );
    glRasterPos3f(0, m_GlWindowSize.height, -1.0f);
-   
+
    glDrawPixels (m_GlWindowSize.width, m_GlWindowSize.height, GL_RGB, GL_UNSIGNED_BYTE, m_ResizedImage.ptr(0));
-   
+
    // Enabling depth test
    glEnable(GL_DEPTH_TEST);
-   
-   // Set the appropriate projection matrix so that rendering is done 
+
+   // Set the appropriate projection matrix so that rendering is done
    // in an environment like the real camera (without distorsion)
    glMatrixMode(GL_PROJECTION);
    double proj_matrix[16];
@@ -86,7 +90,7 @@ void ArUco::drawScene() {
    m_CameraParams.glGetProjectionMatrix(m_ResizedImage.size(),m_GlWindowSize,proj_matrix,0.05,10);
    glLoadIdentity();
    glLoadMatrixd(proj_matrix);
-   
+
    // Debug : outputting projection matrix
    /*
     std::cout<<"Projection Matrix"<<std::endl;
@@ -101,10 +105,12 @@ void ArUco::drawScene() {
     // -------------------------------------------------------------------
     // we can start drawing!
     // -------------------------------------------------------------------
-    
+
    double modelview_matrix[16];
    std::cout << "Number of markers: " << m_Markers.size() << std::endl;
    // For each detected marker
+
+
 
    for (unsigned int m=0;m<m_Markers.size();m++)
    {
@@ -112,29 +118,65 @@ void ArUco::drawScene() {
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
       glLoadMatrixd(modelview_matrix);
-      
+
       // Disabling light if it is on
       GLboolean lightOn = false;
       glGetBooleanv(GL_LIGHTING, &lightOn);
       if(lightOn) {
          glDisable(GL_LIGHTING);
       }
-      
+
       // Drawing axis
       drawAxis(m_MarkerSize);
-      
+
       // Drawing a cube
       glColor3f(1,0.4f,0.4f);
       glTranslatef(0, m_MarkerSize/2,0);
-      
+
       glPushMatrix();
+
       glutWireCube( m_MarkerSize );
-      
+
+
+     // test initialisation:
+
+     GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
+    GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
+    GLfloat specular[] = { 0.7, 0.7, 0.3, 1 };
+    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, amb_light );
+    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+    glEnable( GL_LIGHT0 );
+    glEnable( GL_COLOR_MATERIAL );
+    glShadeModel( GL_SMOOTH );
+    glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE );
+    glDepthFunc( GL_LEQUAL );
+    glEnable( GL_DEPTH_TEST );
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+
+
+
+      glTranslatef(0.0f,-0.05f,0.0f);
+      glScalef(0.7f*m_MarkerSize ,0.7f*m_MarkerSize, 0.7f*m_MarkerSize );
+
+      if (m == 0)
+        objet.Draw();
+
+     if (m==1) {
+        //objet.Draw();
+        //glTranslatef(0.0f,0.05f,0.0f);
+        objet2.Draw();
+    }
+
       // Re-enabling light if it is on
       if(lightOn) {
          glEnable(GL_LIGHTING);
       }
-      
+
+      //objet.Release();
+
       glPopMatrix();
    }
 
@@ -142,7 +184,7 @@ void ArUco::drawScene() {
    // Disabling depth test to display the video
     // -------------------------------------------------------------------
    glDisable(GL_DEPTH_TEST);
-   
+
    m_pixels.create(m_GlWindowSize.height , m_GlWindowSize.width, CV_8UC3);
    //use fast 4-byte alignment (default anyway) if possible
    glPixelStorei(GL_PACK_ALIGNMENT, (m_pixels.step & 3) ? 1 : 4);
@@ -158,25 +200,25 @@ void ArUco::drawScene() {
 void ArUco::idle(Mat newImage) {
    // Getting new image
    m_InputImage = newImage.clone();
-   
+
    // Do that here ?
    resize(m_InputImage.size().width, m_InputImage.size().height);
-   
+
    // Undistort image based on distorsion parameters
    m_UndInputImage.create(m_InputImage.size(),CV_8UC3);
-   
+
    //transform color that by default is BGR to RGB because windows systems do not allow reading BGR images with opengl properly
    cv::cvtColor(m_InputImage,m_InputImage,CV_BGR2RGB);
-   
+
    //remove distorion in image
    // Jim commented next line and added the clone line
    //cv::undistort(m_InputImage,m_UndInputImage, m_CameraParams.CameraMatrix, m_CameraParams.Distorsion);
    m_UndInputImage = m_InputImage.clone();
-   
+
    //detect markers
    m_PPDetector.detect(m_UndInputImage, m_Markers, m_CameraParams.CameraMatrix, Mat(), m_MarkerSize);
    //m_PPDetector.detect(m_UndInputImage, m_Markers, m_CameraParams, m_MarkerSize);
-   
+
    //resize the image to the size of the GL window
    cv::resize(m_UndInputImage,m_ResizedImage,m_GlWindowSize);
 }
@@ -184,7 +226,7 @@ void ArUco::idle(Mat newImage) {
 // Resize function
 void ArUco::resize(GLsizei iWidth, GLsizei iHeight) {
    m_GlWindowSize=Size(iWidth,iHeight);
-   
+
    //not all sizes are allowed. OpenCv images have padding at the end of each line in these that are not aligned to 4 bytes
    if (iWidth*3%4!=0) {
       iWidth+=iWidth*3%4;//resize to avoid padding
@@ -206,13 +248,13 @@ cv::Mat ArUco::getPixels() {
 // Test using ArUco to display a 3D cube in OpenCV
 void ArUco::draw3DCube(cv::Mat img, int markerInd) {
    if(m_Markers.size() > markerInd) {
-      aruco::CvDrawingUtils::draw3dCube(img, m_Markers[markerInd], m_CameraParams); 
+      aruco::CvDrawingUtils::draw3dCube(img, m_Markers[markerInd], m_CameraParams);
    }
 }
 
 void ArUco::draw3DAxis(cv::Mat img, int markerInd) {
    if(m_Markers.size() > markerInd) {
-      aruco::CvDrawingUtils::draw3dAxis(img, m_Markers[markerInd], m_CameraParams); 
+      aruco::CvDrawingUtils::draw3dAxis(img, m_Markers[markerInd], m_CameraParams);
    }
-   
+
 }

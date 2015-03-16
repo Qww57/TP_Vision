@@ -178,11 +178,11 @@ glEnableClientState(GL_VERTEX_ARRAY);						// Enable vertex arrays
  * Program code
  ***************************************************************************/
 
-
+/*
 Model_OBJ obj;
 float g_rotation;
 glutWindow win;
-/*
+
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

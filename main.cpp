@@ -21,6 +21,7 @@ using namespace aruco;
 
 
 Model_OBJ objet;
+Model_OBJ objet2;
 
 // number of the camera used. usually 0 for internal
 const int cameraId = 0;
@@ -104,7 +105,6 @@ void doWork() {
 
    // Calling ArUco draw function
    arucoManager->drawScene();
-    objet.Draw();
 
    // Swapping GLUT buffers
    glutSwapBuffers();
@@ -161,10 +161,11 @@ void exitFunction() {
 // Main
 int main(int argc, char * argv[])
 {
+   objet.Load("models/statue.obj");
+   objet2.Load("models/Lamp.obj");
+
    // OpenGL/GLUT Initialization
    glutInit(&argc, argv);
-
-   objet.Load("models/statue.obj");
 
    // print a welcome message, and the OpenCV version
    cout << "Welcome to arucoMinimal, using OpenCV version " <<
@@ -178,6 +179,7 @@ int main(int argc, char * argv[])
    std::cout<<"ArUco OK"<<std::endl;
 
    // Creating the OpenCV capture
+   //Mat imgOriginal;
    cap.open(cameraId);
    if(!cap.isOpened()) {
       cerr << "Erreur lors de l'initialisation de la capture de la camera !"<< endl;
@@ -189,11 +191,15 @@ int main(int argc, char * argv[])
       cap >> curImg;
    }
 
+    //flip(imgOriginal,imgOriginal,1);
+
+
    // Getting width/height of the image
    widthFrame  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
    heightFrame = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
    std::cout<<"Frame width = "<< widthFrame <<std::endl;
    std::cout<<"Frame height = "<< heightFrame <<std::endl;
+
 
    // OpenCV window
    windowNameCapture = "Scene";
