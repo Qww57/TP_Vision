@@ -19,6 +19,9 @@
 
 using namespace aruco;
 
+
+Model_OBJ objet;
+
 // number of the camera used. usually 0 for internal
 const int cameraId = 0;
 
@@ -101,6 +104,7 @@ void doWork() {
 
    // Calling ArUco draw function
    arucoManager->drawScene();
+    objet.Draw();
 
    // Swapping GLUT buffers
    glutSwapBuffers();
@@ -152,7 +156,7 @@ void exitFunction() {
 
 }
 
-Model_OBJ objet;
+
 
 // Main
 int main(int argc, char * argv[])
@@ -188,10 +192,8 @@ int main(int argc, char * argv[])
    // Getting width/height of the image
    widthFrame  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
    heightFrame = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
-   std::cout<<"Frame width = "<<widthFrame<<std::endl;
-   std::cout<<"Frame height = "<<heightFrame<<std::endl;
-
-   objet.Draw();
+   std::cout<<"Frame width = "<< widthFrame <<std::endl;
+   std::cout<<"Frame height = "<< heightFrame <<std::endl;
 
    // OpenCV window
    windowNameCapture = "Scene";
