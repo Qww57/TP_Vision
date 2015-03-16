@@ -10,8 +10,9 @@
 #include "ArUco-OpenGL.h"
 #include "ObjLoader.h"
 
-extern Model_OBJ objet;
-extern Model_OBJ objet2;
+extern Model_OBJ statue;
+extern Model_OBJ lampe;
+extern Model_OBJ ampoule;
 
 // Constructor
 ArUco::ArUco(string intrinFileName, float markerSize) {
@@ -58,11 +59,15 @@ void ArUco::drawAxis(float axisSize) {
 
 // GLUT functionnalities
 
+bool lumiere = false;
+
 // Drawing function
 void ArUco::drawScene() {
    // If we do not have an image we don't do anyhting
    if (m_ResizedImage.rows==0)
       return;
+
+    lumiere = false;
 
    // Setting up  OpenGL matrices
    glMatrixMode(GL_MODELVIEW);
@@ -127,7 +132,7 @@ void ArUco::drawScene() {
       }
 
       // Drawing axis
-      drawAxis(m_MarkerSize);
+      //drawAxis(m_MarkerSize);
 
       // Drawing a cube
       glColor3f(1,0.4f,0.4f);
@@ -141,33 +146,61 @@ void ArUco::drawScene() {
      // test initialisation:
 
      GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
-    GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
-    GLfloat specular[] = { 0.7, 0.7, 0.3, 1 };
-    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, amb_light );
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
-    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
-    glEnable( GL_LIGHT0 );
-    glEnable( GL_COLOR_MATERIAL );
-    glShadeModel( GL_SMOOTH );
-    glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE );
-    glDepthFunc( GL_LEQUAL );
-    glEnable( GL_DEPTH_TEST );
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+     GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
+     GLfloat specular[] = { 0.7, 0.7, 0.3, 1 };
+     glLightModelfv( GL_LIGHT_MODEL_AMBIENT, amb_light );
+     glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+     glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+     //glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+     glEnable( GL_LIGHT0 );
+     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+     glEnable( GL_COLOR_MATERIAL );
+     glShadeModel( GL_SMOOTH );
+     glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+     glDepthFunc( GL_LEQUAL );
+     glEnable( GL_DEPTH_TEST );
+     glEnable(GL_LIGHTING);
+     glEnable(GL_LIGHT0);
 
 
 
 
+      glColor3f(1.0f,1.0f,1.0f);
       glTranslatef(0.0f,-0.05f,0.0f);
       glScalef(0.7f*m_MarkerSize ,0.7f*m_MarkerSize, 0.7f*m_MarkerSize );
 
       if (m == 0)
-        objet.Draw();
+        statue.Draw();
 
      if (m==1) {
-        //objet.Draw();
-        //glTranslatef(0.0f,0.05f,0.0f);
-        objet2.Draw();
+        lumiere = true;
+
+        lampe.Draw();
+
+         float position[4] = {0.0, m_MarkerSize/2, 0.0, 1.0 };
+
+         GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
+         GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
+         GLfloat specular[] = { 0.7, 0.7, 0.3, 1 };
+         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, amb_light );
+         glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+         glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+         glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+         glEnable( GL_LIGHT0 );
+         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+         glEnable( GL_COLOR_MATERIAL );
+         glShadeModel( GL_SMOOTH );
+         glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+         glDepthFunc( GL_LEQUAL );
+         glEnable( GL_DEPTH_TEST );
+         glEnable(GL_LIGHTING);
+         glEnable(GL_LIGHT0);
+
+         ampoule.Draw();
+         glDisable(GL_FRONT_AND_BACK);
+
     }
 
       // Re-enabling light if it is on

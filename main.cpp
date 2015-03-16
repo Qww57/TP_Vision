@@ -20,11 +20,12 @@
 using namespace aruco;
 
 
-Model_OBJ objet;
-Model_OBJ objet2;
+Model_OBJ statue;
+Model_OBJ lampe;
+Model_OBJ ampoule;
 
 // number of the camera used. usually 0 for internal
-const int cameraId = 0;
+const int cameraId = 1;
 
 // marker size (in meters)
 const float markerSize = 0.105f;
@@ -161,8 +162,9 @@ void exitFunction() {
 // Main
 int main(int argc, char * argv[])
 {
-   objet.Load("models/statue.obj");
-   objet2.Load("models/Lamp.obj");
+   statue.Load("models/statue.obj");
+   lampe.Load("models/LampCorps.obj");
+   ampoule.Load("models/LampAmp.obj");
 
    // OpenGL/GLUT Initialization
    glutInit(&argc, argv);
