@@ -124,6 +124,7 @@ void ArUco::drawScene() {
       glLoadIdentity();
       glLoadMatrixd(modelview_matrix);
 
+
       // Disabling light if it is on
       GLboolean lightOn = false;
       glGetBooleanv(GL_LIGHTING, &lightOn);
@@ -178,7 +179,7 @@ void ArUco::drawScene() {
 
         lampe.Draw();
 
-         float position[4] = {0.0, m_MarkerSize/2, 0.0, 1.0 };
+         //float position[4] = {0.0, m_MarkerSize/2, 0.0, 1.0 };
 
          GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
          GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
